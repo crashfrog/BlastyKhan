@@ -12,12 +12,6 @@ import shutil
 
 app = Flask(__name__)
 
-blast_cmd = """
-    blastn
-    --opt
-    --opt2
-    --0pt3 {arg}
-""".replace('\t', '').replace('\n', ' ')
 
 def jobs_manager():
     if not hasattr(g, 'jobs_server'):
@@ -39,29 +33,32 @@ def index():
 </html>
 """
 
-@app.route('/api/submit', method=['POST', 'GET'])
+@app.route('/api/submit', method=['POST',])
 def start():
     "Kick off BLAST job"
+
+    blast_cmd = """
+        blastn
+        --opt
+        --opt2
+        --0pt3 {arg}
+""".replace('\t', '').replace('\n', ' ')
+
     job_dir = pathlib.Path(tempfile.mkdtemp())
-    if 'query' in request.form:
-        q_string = request.form['query']
-        # start a job
+    fa = request.files['file_a']
+    file_a = job_dir / secure_filename(fa.filename)
+    fa.save(file_a)
+    fb = request.files['file_b']
+    file_b = job_dir / secure_filename(fb.filename)
+    fb.save(file_b)
 
-        proc = subprocess.Popen()
+    # start a job
 
-        jobs_manager().newJob(job_dir, proc)
+    proc = subprocess.Popen(blast_cmd.format(**locals()).split())
 
-        return job_id
-    elif request.method == 'POST':
-        fi = request.files['query_file']
-        fi.save(job_dir / secure_filename(fi.filename))
-        # start a job
+    jobs_manager().newJob(job_dir, proc)
 
-        proc = subprocess.Popen()
-
-        jobs_manager().newJob(job_dir, proc)
-
-        return job_id
+    return job_id
 
 
 
@@ -75,7 +72,7 @@ def poll(job_id):
         # else
         jobs_manager().rmJob(job_id)
         shutil.rmtree(job_dir)
-        return dict()
+        return dict() # alignment from BLAST
     return dict(job_id=job_id,
                 status="running")
 

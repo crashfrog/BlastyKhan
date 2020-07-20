@@ -1,16 +1,16 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3.7
 
 """The setup script."""
 
 from setuptools import setup, find_packages
 
-with open('README.rst') as readme_file:
+with open('README.md') as readme_file:
     readme = readme_file.read()
 
-with open('HISTORY.rst') as history_file:
-    history = history_file.read()
+# with open('HISTORY.rst') as history_file:
+#     history = history_file.read()
 
-requirements = ['porerefiner >= 0.8.4',]
+requirements = ['flask>=1.1.2', 'Click>=7.1.2', 'biopython>=1.76']
 
 setup_requirements = [ ]
 
